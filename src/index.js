@@ -5,8 +5,6 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import StarRating from './StarRating.jsx';
 
-{/* <App /> */}
-
 
 function Test(){
   const [movieRating, setMovieRating] = useState(0);
@@ -22,13 +20,7 @@ function Test(){
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-{/*    <StarRating maxRating={5} 
-      messages={["Terrible", "Bad", "Okay", "Good", "Amazing"]}/>
-    <StarRating size={20} color={"red"} className='test' defaultRating={2} />
-    <StarRating 
-      maxRating={10} 
-      defaultRating={3}/> */}
-    <Test />
+    <App /> 
   </React.StrictMode>
 );
 
