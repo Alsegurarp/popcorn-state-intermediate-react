@@ -243,21 +243,15 @@ function handleAdd() {
 }
 
   useEffect(
-	  function () {
-      function callback(e) {
-      if(e.code === "Escape") {
-        onCloseMovie();
-      }
-    }
-    document.addEventListener("keydown", callback);
-
-    return function () {
-      document.removeEventListener("keydown", callback);
-    }
+	function () {
+		document.addEventListener("keydown", function (e) {
+			if(e.code === "Escape") {
+				onCloseMovie(); // This is how i called it in this comp
+        console.log("closing")
+			}
+		})
 	}, [onCloseMovie]
 );
-
-
 
   
   useEffect(( function(){
