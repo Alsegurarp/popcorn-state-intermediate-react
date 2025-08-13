@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import StarRating from "./StarRating";
 
-
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
@@ -222,6 +221,8 @@ const [movie, setMovie] = useState({})
 const [loading, setLoading] = useState(false);
 const [userRating, setUserRating] = useState('');
 
+const [avgRating, setAvgRating] = useState(0);
+
 const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
 const watchedUserRating = watched.find((movie) => movie.imdbID === selectedId)?.userRating;
 
@@ -237,6 +238,7 @@ function handleAdd() {
     runtime: Number(runtime.split(" ").at(0)),
     userRating,
   }
+  
 
   onAddWatched(newWatchedMovie)
   onCloseMovie();
@@ -270,6 +272,10 @@ function handleAdd() {
   useEffect(function() {
     if(!title) return;
     document.title = `Movie | ${title}`;
+
+    return function(){
+      document.title = "usePopcorn";
+    }
     }, 
   [title])
 
@@ -290,6 +296,7 @@ function handleAdd() {
         </div>
       </header>
       <section>
+        <p>{avgRating}</p>
         <div className="rating">
           {!isWatched ? (
             <>
