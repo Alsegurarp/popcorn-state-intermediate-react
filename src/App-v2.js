@@ -51,11 +51,18 @@ function Navbar({children}){
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
+  // const [watched, setWatched] = useState([]);
 
   const [selectedId, setSelectedId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // To retrieve the data from our localStorage, we might do it explicitly - using a function
+  const [watched, setWatched] = useState(function () {
+    const storedValue = localStorage.getItem('watched');
+    return JSON.parse(storedValue);
+    // The browser has nothing, then nothing will happen, after u add something to the list, will appear on the next reloading 
+  });
 
   function handleSelectedMovie(id){
     setSelectedId((selectedId) => (id === selectedId ? null : id));
@@ -67,22 +74,30 @@ export default function App() {
 
   function handleAddWatched(movie){
     setWatched(watched => [...watched, movie])
+    // localStorage.setItem("watched", JSON.stringify([...watched, movie]));
   }
 
   function handleDeleteWatched(id){
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id))
   }
 
+  useEffect(
+    function () {
+      localStorage.setItem("watched", JSON.stringify(watched));
+    }
+  ,[watched])
 
-
-  useEffect( function (){
-    async function fetchMovies(){
+  useEffect( 
+    function (){
+      async function fetchMovies(){
+        const controller = new AbortController();
     
     try {
         setIsLoading(true);
         setError("");
         const res = await fetch(
-        `https://www.omdbapi.com/?apikey=fe2d4d6&s=${query}`
+        `https://www.omdbapi.com/?apikey=fe2d4d6&s=${query}`,
+        {signal: controller.signal}
         );
         if(!res.ok)
           throw new Error("Something went wrong with fetching movies!")
@@ -92,8 +107,11 @@ export default function App() {
         if(data.Response === "False") throw new Error ("Movie not found");
 
         setMovies(data.Search);
+        setError("");
       } catch(err) {
-        setError(err.message)
+        if(err.name !== "AbortError"){
+            setError(err.message);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -107,6 +125,10 @@ export default function App() {
 
 
     fetchMovies();
+      return function () {
+        const controller = new AbortController();
+        controller.abort();
+      }
   }, [query]);
 
   return (
@@ -181,7 +203,7 @@ function BoxConditional({ children }){
       className="btn-toggle"
       onClick={() => setIsOpen((open) => !open)}
       >
-      {isOpen ? "–" : "+"}
+      {isOpen ? "-" : "+"}
       </button>
     {isOpen && children}
     </div>
@@ -221,13 +243,24 @@ const [movie, setMovie] = useState({})
 const [loading, setLoading] = useState(false);
 const [userRating, setUserRating] = useState('');
 
-const [avgRating, setAvgRating] = useState(0);
 
 const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
 const watchedUserRating = watched.find((movie) => movie.imdbID === selectedId)?.userRating;
 
 // Ahora, destructurarlo:
-const {Title: title, Year: year, Poster: poster, Runtime: runtime, imdbRating, Plot: plot, Released: released, Actors: actors, Director: director, Genre: genre,   } = movie;
+const {
+  Title: title, 
+  Year: year, 
+  Poster: poster, 
+  Runtime: runtime, 
+  imdbRating, 
+  Plot: plot, 
+  Released: released, 
+  Actors: actors, 
+  Director: director, 
+  Genre: genre
+} = movie;
+
 
 function handleAdd() {
   const newWatchedMovie = {
@@ -238,7 +271,6 @@ function handleAdd() {
     runtime: Number(runtime.split(" ").at(0)),
     userRating,
   }
-  
 
   onAddWatched(newWatchedMovie)
   onCloseMovie();
@@ -277,7 +309,9 @@ function handleAdd() {
       document.title = "usePopcorn";
     }
     }, 
-  [title])
+  [title]);
+
+  
 
   return(
     <div className="details">
@@ -296,7 +330,6 @@ function handleAdd() {
         </div>
       </header>
       <section>
-        <p>{avgRating}</p>
         <div className="rating">
           {!isWatched ? (
             <>

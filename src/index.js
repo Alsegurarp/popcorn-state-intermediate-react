@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import StarRating from './StarRating.jsx';
+import Appv2 from './App-v2';
 
 
 function Test(){
@@ -30,7 +31,7 @@ function Test(){
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App /> 
+    <Appv2 /> 
   </React.StrictMode>
 );
 
