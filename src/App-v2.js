@@ -24,14 +24,27 @@ function Navbar({children}){
   }
 
   function Search({query, setQuery}){
+    const inputEl = useRef(null);
+
+    useEffect(function(){
+      function callback(e){
+        if(e.code === "Enter"){
+          inputEl.current.focus();
+        }
+      }
+      
+      document.addEventListener("keydown", callback);
+      return () => document.addEventListener("keydown", callback);
+    },[])
 
       return(
-              <input
+          <input
             className="search"
             type="text"
             placeholder="Search movies..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            ref={inputEl}
           />
     )
   }
@@ -105,6 +118,7 @@ export default function App() {
         const data = await res.json();
 
         if(data.Response === "False") throw new Error ("Movie not found");
+        // Just if the error is that the movie doesnt exist
 
         setMovies(data.Search);
         setError("");
@@ -261,6 +275,7 @@ const {
   Genre: genre
 } = movie;
 
+const [avgRating, setAvgRating] = useState(0);
 
 function handleAdd() {
   const newWatchedMovie = {
@@ -274,6 +289,10 @@ function handleAdd() {
 
   onAddWatched(newWatchedMovie)
   onCloseMovie();
+
+  // setAvgRating(Number(imdbRating));
+  // setAvgRating( () => (avgRating + userRating) / 2);
+
 }
 
   useEffect(
@@ -329,6 +348,8 @@ function handleAdd() {
           <p><span>🌟</span>{imdbRating} IMDb Rating</p>
         </div>
       </header>
+
+      <p>{avgRating}</p>
       <section>
         <div className="rating">
           {!isWatched ? (
@@ -424,5 +445,6 @@ function WatchedMovieUnit({movie, onHandleDelete}){
     </li>
   )
 }
+
 
 
