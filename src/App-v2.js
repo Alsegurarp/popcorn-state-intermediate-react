@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import StarRating from "./StarRating";
+import useMovies from "./useMovies";
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -28,6 +29,13 @@ function Navbar({children}){
 
     useEffect(function(){
       function callback(e){
+
+        if(document.activeElement === inputEl.current){
+          return;
+          // Literalmente, no hace nada, es una 
+          // function para comparar que el enter no se presione varias veces
+        }
+
         if(e.code === "Enter"){
           inputEl.current.focus();
         }
@@ -35,7 +43,11 @@ function Navbar({children}){
       
       document.addEventListener("keydown", callback);
       return () => document.addEventListener("keydown", callback);
-    },[])
+      },
+    [setQuery]);
+    // se debe de declarar en el dependency array que está esperando a setQuery
+    // Para cambiar 
+
 
       return(
           <input
@@ -63,12 +75,13 @@ function Navbar({children}){
   
 export default function App() {
   const [query, setQuery] = useState("");
-  const [movies, setMovies] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const {movies, isLoading, error} = useMovies(query); 
+  // Retorna un objeto, peroo inmediatamente lo destructuramos
+
   // const [watched, setWatched] = useState([]);
 
-  const [selectedId, setSelectedId] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+
 
   // To retrieve the data from our localStorage, we might do it explicitly - using a function
   const [watched, setWatched] = useState(function () {
@@ -100,50 +113,7 @@ export default function App() {
     }
   ,[watched])
 
-  useEffect( 
-    function (){
-      async function fetchMovies(){
-        const controller = new AbortController();
-    
-    try {
-        setIsLoading(true);
-        setError("");
-        const res = await fetch(
-        `https://www.omdbapi.com/?apikey=fe2d4d6&s=${query}`,
-        {signal: controller.signal}
-        );
-        if(!res.ok)
-          throw new Error("Something went wrong with fetching movies!")
 
-        const data = await res.json();
-
-        if(data.Response === "False") throw new Error ("Movie not found");
-        // Just if the error is that the movie doesnt exist
-
-        setMovies(data.Search);
-        setError("");
-      } catch(err) {
-        if(err.name !== "AbortError"){
-            setError(err.message);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    if(query.length < 3){
-      setMovies([]);
-      setError("");
-      return;
-    } // Less than 3 characters, im not going to do the research
-
-
-    fetchMovies();
-      return function () {
-        const controller = new AbortController();
-        controller.abort();
-      }
-  }, [query]);
 
   return (
     <>
@@ -257,6 +227,15 @@ const [movie, setMovie] = useState({})
 const [loading, setLoading] = useState(false);
 const [userRating, setUserRating] = useState('');
 
+const countRef = useRef(0);
+// We are not allowed to mutate the original data on React, so we need a state for this
+  useEffect( 
+    function() {
+      if (userRating) countRef.current = countRef.current + 1;
+      // si hay un userRating entonces lo hace - Para que no tome un null
+  },
+  [userRating]);
+
 
 const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
 const watchedUserRating = watched.find((movie) => movie.imdbID === selectedId)?.userRating;
@@ -285,6 +264,7 @@ function handleAdd() {
     imdbRating: Number(imdbRating),
     runtime: Number(runtime.split(" ").at(0)),
     userRating,
+    countRatingDecisions: countRef.current
   }
 
   onAddWatched(newWatchedMovie)

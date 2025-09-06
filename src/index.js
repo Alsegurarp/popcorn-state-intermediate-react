@@ -18,15 +18,6 @@ function Test(){
   )
 }
 
-{/*
-      <StarRating maxRating={5} 
-      messages={["Terrible", "Bad", "Okay", "Good", "Amazing"]}/>
-    <StarRating size={20} color={"red"} className='test' defaultRating={2} />
-    <StarRating 
-      maxRating={10} 
-      defaultRating={3}/> 
-    <Test />
-  */}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
