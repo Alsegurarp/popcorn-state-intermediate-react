@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 
-export default function useMovies(query, callback){
+export default function useMovies(query){
     
     const [movies, setMovies] = useState([]);
     const [isLoading, setIsLoading] = useState(false);

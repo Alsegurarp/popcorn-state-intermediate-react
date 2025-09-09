@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import StarRating from "./StarRating";
 import useMovies from "./useMovies";
+import useKey from "./useKey";
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -27,6 +28,13 @@ function Navbar({children}){
   function Search({query, setQuery}){
     const inputEl = useRef(null);
 
+
+    useKey('Enter', function () {
+      if(document.activeElement === inputEl.current) return;
+        inputEl.current.focus();
+        setQuery("");
+    })
+    /*
     useEffect(function(){
       function callback(e){
 
@@ -45,6 +53,7 @@ function Navbar({children}){
       return () => document.addEventListener("keydown", callback);
       },
     [setQuery]);
+    */
     // se debe de declarar en el dependency array que está esperando a setQuery
     // Para cambiar 
 
@@ -80,15 +89,17 @@ export default function App() {
   // Retorna un objeto, peroo inmediatamente lo destructuramos
 
   // const [watched, setWatched] = useState([]);
-
+  // const [watched, setWatched] = ([], 'watched')
 
 
   // To retrieve the data from our localStorage, we might do it explicitly - using a function
+  
   const [watched, setWatched] = useState(function () {
     const storedValue = localStorage.getItem('watched');
     return JSON.parse(storedValue);
     // The browser has nothing, then nothing will happen, after u add something to the list, will appear on the next reloading 
   });
+  
 
   function handleSelectedMovie(id){
     setSelectedId((selectedId) => (id === selectedId ? null : id));
@@ -106,13 +117,6 @@ export default function App() {
   function handleDeleteWatched(id){
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id))
   }
-
-  useEffect(
-    function () {
-      localStorage.setItem("watched", JSON.stringify(watched));
-    }
-  ,[watched])
-
 
 
   return (
@@ -275,6 +279,9 @@ function handleAdd() {
 
 }
 
+  useKey("escape", onCloseMovie)
+
+/*
   useEffect(
 	function () {
 		document.addEventListener("keydown", function (e) {
@@ -285,6 +292,7 @@ function handleAdd() {
 		})
 	}, [onCloseMovie]
 );
+*/
 
   
   useEffect(( function(){
